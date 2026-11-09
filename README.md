@@ -1,8 +1,8 @@
 # HALOFLUX · Codex
 
-<p>
-  <a href="./README.md"><img src="./docs/lang-zh.svg" alt="简体中文" width="110" height="30"></a>
-  <a href="./README.en.md"><img src="./docs/lang-en.svg" alt="English" width="100" height="30"></a>
+<p align="center">
+  <a href="./README.md"><img alt="简体中文" src="https://img.shields.io/badge/简体中文-d9d9d9"></a>
+  <a href="./README.en.md"><img alt="English" src="https://img.shields.io/badge/English-d9d9d9"></a>
 </p>
 
 把 Codex 本地会话活动映射到 HALOFLUX 光环的**独立实时看板**。在浏览器里看半圆光环、运镜、具体操作、执行对象和结果，右侧核对聊天与活动记录。
