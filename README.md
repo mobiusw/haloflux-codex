@@ -1,5 +1,10 @@
 # HALOFLUX · Codex
 
+<p>
+  <a href="./README.md"><img src="./docs/lang-zh.svg" alt="简体中文" width="110" height="30"></a>
+  <a href="./README.en.md"><img src="./docs/lang-en.svg" alt="English" width="100" height="30"></a>
+</p>
+
 把 Codex 本地会话活动映射到 HALOFLUX 光环的**独立实时看板**。在浏览器里看半圆光环、运镜、具体操作、执行对象和结果，右侧核对聊天与活动记录。
 
 **预览版 `0.1.0-preview.1` · Node.js 22+ · 无第三方运行依赖 · 仅限非商业使用**
@@ -97,6 +102,8 @@ node cli.cjs --help
 | 其他形式 | `运行命令`／`调用工具`，保留底层工具名供核对 |
 
 Notebook 规则不限定具体文件名，但限定启动命令形式。直接在 Jupyter 或 VS Code 点击“运行单元格”，通常不会产生可供本看板识别的 Codex 调用事件。
+
+**文档语言切换不会改变界面语言。** 当前看板标签和生成的操作描述仍以中文为主。
 
 ### 操作结果与待处理
 
