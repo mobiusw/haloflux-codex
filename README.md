@@ -1,25 +1,25 @@
 # HALOFLUX · Codex
 
-**简体中文** | [English](./README.en.md)
+**English** | [简体中文](./README.zh-CN.md)
 
-把 Codex 本地会话活动映射到 HALOFLUX 光环的**独立实时看板**。在浏览器里看半圆光环、运镜、具体操作、执行对象和结果，右侧核对聊天与活动记录。
+A **standalone live dashboard** that maps local Codex session activity onto the HALOFLUX light ring. Watch its half-ring composition, camera motion, actions, targets and results, with chat and activity records alongside it.
 
-**预览版 `0.1.0-preview.1` · Node.js 22+ · 无第三方运行依赖 · 仅限非商业使用**
+**Preview `0.1.0-preview.1` · Node.js 22+ · No third-party runtime dependencies · Noncommercial use only**
 
-![HALOFLUX Codex：合成会话预览](docs/preview.png)
+![HALOFLUX Codex: synthetic session preview](docs/preview.png)
 
-*预览图完全使用合成会话与示例文件名，不是真实聊天或训练数据。*
+*The preview uses only synthetic events and example filenames, not real conversations or training data.*
 
-这是基于 HALOFLUX 修改的非官方 Codex 适配版，复用 DeepSeek Harness 社区版本的 Canvas 引擎。它读取本地日志，**不是 Codex 内置插件，也不是 DeepSeek Harness 插件包**；不会替换 Codex 桌面应用背景。
+This unofficial Codex adaptation modifies HALOFLUX and reuses the DeepSeek Harness community edition's Canvas engine. It reads local logs: **it is neither a built-in Codex plugin nor a DeepSeek Harness plugin bundle**, and it does not replace the Codex desktop application's background.
 
-## 快速开始
+## Quick start
 
-1. 安装 [Node.js 22 或更高版本](https://nodejs.org/)。
-2. 下载本仓库 ZIP 并解压，或下载 Releases 中的发行包。
-3. **Windows：双击 `start.cmd`**。服务启动后自动打开浏览器；保持启动窗口开启，按 `Ctrl+C` 停止。
-4. 在 Codex 中正常对话，在看板的下拉框中选择会话。
+1. Install [Node.js 22 or later](https://nodejs.org/).
+2. Download and extract this repository's ZIP, or download a package from Releases.
+3. **Windows: double-click `start.cmd`.** The server opens your browser automatically. Keep its terminal window open; press `Ctrl+C` to stop it.
+4. Use Codex normally and select the corresponding session in the dashboard.
 
-也可以从终端启动，无须运行 `npm install`：
+Alternatively, start it from a terminal. There is no need to run `npm install`:
 
 ```sh
 git clone https://github.com/mobiusw/haloflux-codex.git
@@ -27,152 +27,152 @@ cd haloflux-codex
 node cli.cjs --open
 ```
 
-默认地址为 `http://127.0.0.1:43127/`。不希望自动打开浏览器时，运行 `node cli.cjs`。安装了 npm 的用户也可以运行 `npm start`。
+The default URL is `http://127.0.0.1:43127/`. Run `node cli.cjs` to start without opening a browser. If npm is installed, `npm start` is also available.
 
-### 自定义日志目录和端口
+### Custom log directory and port
 
-默认读取 `CODEX_HOME` 环境变量所指的目录；未设置时读取当前用户的 `~/.codex`：
+The server reads the directory specified by `CODEX_HOME`, falling back to the current user's `~/.codex`:
 
 ```text
-<Codex 主目录>/
-├── sessions/                # 递归查找 rollout JSONL
-└── session_index.jsonl      # 可选，用于显示会话标题
+<Codex home>/
+├── sessions/                # Recursively scanned rollout JSONL files
+└── session_index.jsonl      # Optional session titles
 ```
 
 ```sh
-node cli.cjs --port 43128 --codex-home "你的 Codex 主目录" --open
+node cli.cjs --port 43128 --codex-home "your Codex home directory" --open
 node cli.cjs --help
 ```
 
-`--codex-home` 指向包含 `sessions` 的主目录，不是 `sessions` 本身。没有索引文件时仍能发现会话，使用日志中的用户消息作为备用标题。没有日志时显示空状态，开始一次 Codex 对话后会自动检查更新。文件目录约每 10 秒重新扫描，页面约每秒获取所选会话状态。
+`--codex-home` must point to the directory containing `sessions`, not to `sessions` itself. Session discovery also works without the index file, using user messages in the log as fallback titles. An empty state appears when no logs exist; start a Codex conversation and the dashboard will check again automatically. Directories are rescanned approximately every 10 seconds; the page requests the selected session's state approximately once per second.
 
-服务只监听 `127.0.0.1`，不支持通过局域网或公网访问。Windows 已做本地运行验收；仓库包含 Windows、macOS、Linux 的 Node 22/24 CI 测试配置，其他平台的桌面组合仍应以实际 CI 和本机结果为准。
+The server listens only on `127.0.0.1`; LAN and public access are not supported. Local runtime acceptance was performed on Windows. The repository includes a Node 22/24 CI matrix for Windows, macOS and Linux; consult actual CI and local results for other desktop configurations.
 
-## 当前功能
+## Current features
 
-| 功能 | 当前行为 |
+| Feature | Current behavior |
 |---|---|
-| 会话选择 | 列出最近修改的最多 25 个会话，显示标题和工作目录；记住浏览器上次选择 |
-| 聊天正文 | 显示最近 30 条用户／助手消息；以纯文本呈现，Markdown 不做富文本渲染 |
-| 活动记录 | 最近 160 条事件；可筛选全部、工具或 skill；显示时间、动作、对象、结果和底层工具名 |
-| 跟随与暂停 | 接近列表底部时跟随新记录；暂停只暂停看板，不会停止 Codex 或命令 |
-| 最近活动 | 显示最近事件及其时间，点击进入活动记录 |
-| 会话状态 | 显示日志中的运行、结束、中断或失败状态；运行态超过两分钟没有新日志时显示“等待新日志” |
-| 可折叠统计 | 工具调用数、已完成调用数、日志累计 token、最后事件时间 |
-| 动态光环 | 半圆构图、自动运镜、光束与背景网络；新工具触发光带，明确失败可出现 × 标记 |
-| 语义文字面板 | 轮换显示 skill、历史读取、当前请求、最近回复、工具、操作结果、本轮待处理 |
-| 最近操作 | 合并近期相同动作与目标，最多显示 3 类；不可识别的操作保留通用名称 |
-| 活动耗时 | 显示近期调用的秒数；执行中刷新，结束后固定，横条按近期最长耗时缩放 |
-| 新记录高亮 | 新面板内容短暂使用银紫色高亮和 `NEW`；初始化和恢复时不把旧记录当成新事件 |
-| 宽度适配 | 按实际文字宽度截断或换行，保留分隔点线；窄窗口改为纵向布局 |
-| 历史静默加载 | 初次打开、刷新、切换会话、暂停恢复不重播旧工具光带 |
-| 动画暂停 | 暂停或连接中断时停止动画；尊重系统“减少动态效果”偏好 |
+| Session selector | Lists up to 25 most recently modified sessions, including titles and working directories; remembers the browser's last selection |
+| Chat text | Shows the last 30 user/assistant messages as plain text; Markdown is not rendered as rich text |
+| Activity history | Keeps the latest 160 events; filters for all events, tools or skills; shows timestamps, actions, targets, results and underlying tool names |
+| Following and pausing | Follows new records when near the bottom; pausing affects only the dashboard, not Codex or running commands |
+| Latest activity | Shows the most recent event and timestamp; click to open activity history |
+| Session state | Shows running, completed, interrupted or failed states from logs; a running task without new logs for two minutes displays “waiting for new logs” |
+| Collapsible statistics | Tool call count, completed call count, logged cumulative tokens and last event time |
+| Animated ring | Half-ring composition, automatic camera motion, beams and a background network; new tools trigger beams, and explicit failures can produce × markers |
+| Semantic panels | Rotates through skill evidence, history reads, current request, latest reply, tools, results and current-turn pending issues |
+| Recent actions | Merges recent identical actions and targets, showing up to three categories; unrecognized operations retain generic names |
+| Activity duration | Shows recent call durations in seconds; updates while running and freezes on completion; bars are scaled to the longest recent duration |
+| New-event highlighting | Brief silver/lilac highlights and `NEW` labels for changed panel content; initialization and resume do not mark old events as new |
+| Width adaptation | Measures text to wrap or truncate it, retains dotted separators, and stacks the layout in narrow windows |
+| Quiet history loading | Initial load, refresh, session switching and pause/resume do not replay old tool beams |
+| Animation pausing | Pausing or connection loss stops animation; respects the system's reduced-motion preference |
 
-### 圆盘文字来自哪里
+### Where the ring's text comes from
 
-- **skill**：从助手的显式技能声明、匹配到的 `SKILL.md` 成功读取中提取；同名合并，保留最近 3 种技能。`声明使用` 与 `已读取指引` 是不同证据，后者不代表建议已实际执行。识别不是完整技能审计，可能漏记。
-- **历史读取**：识别部分 `read_thread` 调用，显示可解析的会话标题、请求范围和时间；匹配到记忆文件读取时显示“本机记忆文件”。不会展示隐藏记忆或推理正文，也不能自动识别所有上下文来源。
-- **当前请求／最近回复**：使用最近聊天的简短摘录；支持从附件消息中提取 `My request` 后的请求。
-- **工具**：显示可识别的动作、实际目标文件／测试模块，以及日志状态或结果摘要。
-- **操作结果**：优先展示近期可识别的测试摘要，否则显示最近明确的进程结果。它可能保留上一轮记录，不代表本轮刚发生。
-- **本轮待处理**：只展示本轮中“明确失败、目标已识别、命令可可靠匹配重试”的操作；最多取 3 项进入圆盘轮换，右侧入口显示本轮数量。
+- **skill:** Extracted from explicit assistant skill declarations and matched successful `SKILL.md` reads. Identical names are merged, retaining the latest three distinct skills. “Declared use” and “instructions read” represent different evidence; reading instructions does not prove their advice was applied. This is not a complete skill audit and can miss events.
+- **History reads:** Recognizes some `read_thread` calls and displays a resolvable session title, requested scope and timestamp. Matched memory-file reads are labeled “local memory file.” It does not expose hidden memory or reasoning text, or automatically identify every context source.
+- **Current request / latest reply:** Short excerpts from recent messages; can extract the request following `My request` in attachment messages.
+- **Tools:** Recognized action, actual target file/test module, and logged status or result summary.
+- **Operation results:** Prefers a recent recognized test summary; otherwise shows the latest explicit process result. A result may remain from a previous turn and is not necessarily new in the current turn.
+- **Current-turn pending issues:** Only explicit failures in the current turn with a recognized target and a reliably matchable retry command. Up to three are included in rotating ring panels; the right-side entry shows the current-turn count.
 
-圆盘面板会旋转和轮换，不保证同时可见，也不替代右侧活动记录。skill 和历史读取会跨轮保留，可结合时间判断新旧。
+Panels rotate and alternate, so they are not necessarily visible simultaneously and do not replace the activity list. Skill evidence and history reads may persist across turns; use their timestamps to distinguish old records from new ones.
 
-### 能识别哪些操作
+### Recognized operations
 
-识别基于工具名和有限的命令规则，不是通过额外模型生成描述。
+Recognition uses tool names and a limited set of command rules, not additional model calls.
 
-| 输入形式 | 显示示例 |
+| Input form | Displayed information |
 |---|---|
-| `Get-Content`／`cat` 读取普通文件 | `读取文件 · example.py`，支持引号内的空格与中文 |
-| 读取已匹配的 `skills/<名称>/SKILL.md` | `读取 skill · skill-name` |
-| 独立 `apply_patch` 调用 | `修改文件 · example.py` |
-| `node example.test.cjs` 等已匹配的测试文件 | `运行测试 · example.test.cjs` |
-| `node --check example.js` | `语法检查 · example.js` |
-| `node example.cjs` | `运行脚本 · example.cjs` |
-| `python -m unittest tests.example`、`python -m pytest tests/example.py`、`pytest …` | `运行 Python 测试 · …`，也支持部分 `py`／Python 可执行路径形式 |
-| 测试命令将 `.ipynb` 路径作为独立参数传入 | `运行 Notebook 测试 · 示例.ipynb` |
-| `python -c` 的代码包含 `exec(...)`，随后传入 `.ipynb` 独立参数 | `运行 Notebook · 示例.ipynb` |
-| 已匹配的浏览器打开、刷新、截图 | `打开页面`／`刷新页面`／`查看截图` |
-| 同一次编排调用多个子工具，或检测到 shell 复合命令 | `批量工具调用`／`批量命令`；不把整体失败归给第一个目标 |
-| 其他形式 | `运行命令`／`调用工具`，保留底层工具名供核对 |
+| Ordinary file reads with `Get-Content` / `cat` | Read file · `example.py`; quoted paths support spaces and Chinese characters |
+| Matched reads of `skills/<name>/SKILL.md` | Read skill · `skill-name` |
+| A direct `apply_patch` call | Modify files · `example.py` |
+| Matched test filenames such as `node example.test.cjs` | Run tests · `example.test.cjs` |
+| `node --check example.js` | Syntax check · `example.js` |
+| `node example.cjs` | Run script · `example.cjs` |
+| `python -m unittest tests.example`, `python -m pytest tests/example.py`, `pytest …` | Run Python tests · target; also supports some `py` and explicit Python executable forms |
+| A test command passing an `.ipynb` path as a separate argument | Run Notebook tests · filename |
+| `python -c` code containing `exec(...)`, followed by a separate `.ipynb` path argument | Run Notebook · filename |
+| Matched browser open, reload and screenshot calls | Open page / reload page / view screenshot |
+| Multiple child tools in one orchestration call, or detected compound shell commands | Batch tool call / batch command; an overall failure is not attributed to the first target |
+| Other forms | Run command / call tool, retaining the underlying tool name for verification |
 
-Notebook 规则不限定具体文件名，但限定启动命令形式。直接在 Jupyter 或 VS Code 点击“运行单元格”，通常不会产生可供本看板识别的 Codex 调用事件。
+The Notebook rules are not tied to a particular filename, but they do require a supported launch command. Clicking “Run cell” directly in Jupyter or VS Code generally does not produce a Codex call event that this dashboard can recognize.
 
-**文档语言切换不会改变界面语言。** 当前看板标签和生成的操作描述仍以中文为主。
+**An English README does not change the interface language.** The dashboard's current labels and generated action descriptions are primarily Chinese; the descriptions in this table explain their meaning.
 
-### 操作结果与待处理
+### Results and pending issues
 
-- 解析结构化退出码、明确错误标志，以及部分命令结束元数据。普通输出中出现 `error` 或代码样例里的 `exit_code: 1`，不会单凭这些词判定失败。
-- 对已识别的测试操作，可从标准 `unittest`／部分 `pytest` 汇总中提取测试数量；例如“9 项测试通过”。其他测试框架通常只显示进程退出码。
-- **进程退出码 0 不等于业务结果正确**。缺乏可靠证据时显示“结果未确认”，不自动当作成功。
-- 同一工作目录中的完全相同命令重试明确成功后，撤下对应待处理项，保留“已解决”事件。命令改写后不会自动推断为同一问题；其他命令成功也不会清除它。
-- 旧轮次失败不混入“本轮待处理”；失败及解决记录仍受活动列表的最近 160 条限制。对象无法识别、批量编排或缺乏可靠重试标识的失败只记入活动历史。
-- 尚未接入等待授权／等待用户输入的独立状态；长时间没有日志不会被判定为卡死。
+- Parses structured exit codes, explicit error flags and some command completion metadata. The word `error` in ordinary output, or a code sample containing `exit_code: 1`, is not enough by itself to establish failure.
+- For recognized test operations, extracts counts from standard `unittest` and some `pytest` summaries, such as “9 tests passed.” Other frameworks generally show only the process exit code.
+- **Exit code 0 does not prove business correctness.** Without reliable evidence, the result remains “unconfirmed,” rather than being treated as successful.
+- An explicitly successful retry of the exact same command in the same working directory removes its pending issue and adds a “resolved” event. Rewritten commands are not automatically inferred to be the same operation, and unrelated successful commands do not clear it.
+- Previous-turn failures do not appear as current-turn pending issues. Failure and resolution history remains subject to the latest-160-event limit. Failures with unknown targets, batch orchestration or no reliable retry identifier remain only in activity history.
+- Dedicated “waiting for approval” and “waiting for user input” states are not implemented; a long gap without logs is not classified as a hang.
 
-## 数据真实性与限制
+## Data fidelity and limitations
 
-1. **真实数据层**：来自本机 Codex JSONL 的消息、工具调用、时间戳、已识别 skill／历史读取及 token 字段。看板不能看到日志中没有的事件。
-2. **视觉表现层**：背景网络、粒子、光束形状、亮度及运镜是程序生成的艺术效果，不代表神经元、思考强度、完成百分比或训练质量。没有 SIM 波形／随机十六进制数据面板，新增步骤刻度盘和相位圆环也未启用。
-3. **不是模型训练看板**：尚未接入 epoch、loss、RankIC、梯度或股票交易指标；没有自动执行 Notebook 或训练的功能。
-4. **读取时机**：每秒轮询所选会话并增量解析，但端到端延迟取决于 Codex 何时写日志；不是模型逐 token 的实时流。
-5. **状态口径**：调用耗时包括外层工具／进程开销；日志里的“完成调用”不等于完成一项业务任务。累计 token 直接展示日志字段，不是价格、账单或本轮净用量；没有准确 tok/s 与上下文占比。
-6. **格式兼容性**：适配现有的 `session_meta`、`turn_context`、`event_msg`、`response_item` 等本地日志结构；未来 Codex 改格式时可能需要更新。
-7. **保留上限**：最近 30 条消息、80 条工具记录、160 条活动、160 条技能证据；动画工具队列 40 项、回答显示分段队列 512 项。高事件量下可能跳过部分动画，列表与命令原始输出是核查依据。
+1. **Actual data layer:** Messages, tool calls, timestamps, recognized skill/history-read evidence and token fields come from local Codex JSONL files. Events absent from those files cannot be observed.
+2. **Visual layer:** The network, particles, beam shapes, brightness and camera motion are procedurally generated artistic effects. They do not represent neurons, thinking intensity, completion percentage or training quality. SIM waveforms/random hexadecimal panels are absent, and the added step dial and phase ring are disabled.
+3. **Not a model-training dashboard:** No epoch, loss, RankIC, gradient or trading-metric integration; no automatic Notebook execution or training functionality.
+4. **Update timing:** The selected session is polled approximately every second and parsed incrementally. End-to-end latency depends on when Codex writes logs; this is not a live model token stream.
+5. **Metric semantics:** Durations include outer-tool/process overhead. A completed call is not the same as a completed task. Cumulative tokens display the logged field directly, not a price, bill or net per-turn usage. Accurate tok/s and context utilization are not provided.
+6. **Format compatibility:** Adapts existing local log structures such as `session_meta`, `turn_context`, `event_msg` and `response_item`. Future Codex format changes may require updates.
+7. **Retention limits:** Latest 30 messages, 80 tool records, 160 activity events and 160 skill-evidence records; up to 40 queued tool animations and 512 queued answer-display segments. Heavy activity can skip individual animations; verify against activity records and original command output.
 
-## 隐私与网络
+## Privacy and networking
 
-- 不需要 API key，不调用 OpenAI／其他模型 API，不自行增加模型 token 消耗；但浏览器动画会使用本机 CPU／GPU。
-- 仅从选定 Codex 主目录读取会话及会话索引，不写回日志、不读取 `auth.json`、不读取浏览器 Cookie。
-- 前端只请求当前本地服务，不包含遥测、外部字体或 CDN 运行依赖；页面中的上游链接仅在用户点击后访问。
-- 原始工具参数、输出正文和隐藏推理不发送到前端；仅投影已识别字段和有限结果摘要。**聊天正文、工作目录、目标文件名和部分技能声明证据会在本机页面显示**，截图或分享时请自行检查。
-- 校验 Host 与请求 Origin，仅提供 GET 接口，不开放跨域访问；静态文件使用固定允许列表。这不是具有账号登录的多用户服务，不要自行反向代理到公网。
+- No API key required; no calls to OpenAI or other model APIs, and no additional model-token usage caused by the dashboard itself. Browser animation still uses local CPU/GPU resources.
+- Reads sessions and the session index from the selected Codex home. Does not write to logs, read `auth.json` or access browser cookies.
+- The frontend requests only its local server. No telemetry, external fonts or CDN runtime dependencies. Upstream links are visited only when clicked.
+- Raw tool arguments, output bodies and hidden reasoning are not sent to the frontend; only recognized fields and bounded result summaries are projected. **Chat text, working directories, target filenames and some skill-declaration evidence are displayed locally**; inspect them before sharing screenshots.
+- Checks Host and request Origin, provides GET endpoints only, and does not enable cross-origin access. Static files use a fixed allowlist. This is not an authenticated multi-user service; do not expose it through a public reverse proxy.
 
-## 测试与开发
+## Testing and development
 
 ```sh
 node scripts/test.cjs
-# 或
+# Or:
 npm test
 ```
 
-测试不需要 Codex 登录或模型调用，使用合成事件与自动清理的临时目录。覆盖生命周期、去重、失败优先级、暂停恢复、会话隔离、skill 证据、命令对象、批量归属、结果摘要、待处理与成功重试、150 组排字组合、新事件高亮，以及本地 HTTP 的只读／Host／Origin 检查、中文增量解码、日志截断与空目录启动。
+Tests require neither a Codex login nor model calls. They use synthetic events and automatically cleaned temporary directories. Coverage includes lifecycle, deduplication, failure precedence, pause/resume, session isolation, skill evidence, action targets, batch attribution, result summaries, pending issues and successful retries, 150 text-layout combinations, new-event highlighting, and local HTTP read-only/Host/Origin guards, incremental Unicode decoding, log truncation and empty-directory startup.
 
 ```text
-cli.cjs / start.cmd     启动入口
-server.cjs              本地 HTTP 服务、会话扫描和增量读取
-parser.cjs              日志事件解析
-actions.cjs             动作、对象和重试标识
-results.cjs             有限结果摘要
-skills.cjs / recall.cjs  技能与历史读取证据
-app.js / index.html     会话、正文、活动列表与条件提示
-bridge.js               日志快照到圆盘内容的适配
-engine.js               HALOFLUX Canvas 渲染引擎（修改版）
-live-halo.html          圆盘宿主页面与固定展示参数
+cli.cjs / start.cmd     Startup entry points
+server.cjs              Local HTTP host, session discovery and incremental reads
+parser.cjs              Log-event parsing
+actions.cjs             Actions, targets and retry identities
+results.cjs             Bounded result summaries
+skills.cjs / recall.cjs  Skill and history-read evidence
+app.js / index.html     Session selector, chat, activity and conditional notices
+bridge.js               Log snapshot to ring-content adapter
+engine.js               Modified HALOFLUX Canvas rendering engine
+live-halo.html          Ring host page and fixed presentation parameters
 ```
 
-## 常见问题
+## FAQ
 
-**打不开页面？** 保持服务终端开启，确认输出的本地地址。端口已占用时换用 `--port 43128`；关闭窗口／按 `Ctrl+C` 会停止服务，没有设置开机自启。
+**The page will not open.** Keep the server terminal open and check the URL it prints. If the port is occupied, use `--port 43128`. Closing the window or pressing `Ctrl+C` stops the server; no automatic startup is installed.
 
-**没有会话？** 确认当前 Codex 确实在本机写入 `sessions/*.jsonl`，自定义目录用 `--codex-home` 指定；远程机器上的会话不会自动同步到本机。
+**No sessions appear.** Confirm Codex is writing local `sessions/*.jsonl` files. Use `--codex-home` for a custom directory. Sessions on a remote machine are not automatically synchronized to this computer.
 
-**还会看到 `exec` 或 `js`？** 它们是日志中的底层工具名。无法可靠识别动作时保留通用名称，不猜测具体文件操作；也不拆解任意 JavaScript 编排代码。
+**Why do I still see `exec` or `js`?** These are underlying tool names recorded in logs. Unrecognized actions retain generic names instead of guessing file operations. Arbitrary JavaScript orchestration is not fully decomposed.
 
-**打开后没看到新光束或圆盘较暗？** 历史初始化不会重播旧活动；运行新任务才会产生新事件。空闲时动画会收敛，减少动态效果偏好也会影响显示。
+**No new beams, or the ring is dim?** Loading history does not replay old events. Run a new task to generate activity. Motion settles when idle, and reduced-motion preferences also affect rendering.
 
-**能用于 Claude Code 或直接当桌面背景吗？** 当前没有这两项集成。它是 Codex 本地日志的独立浏览器看板。
+**Can I use it with Claude Code or as the desktop application's background?** Neither integration is currently implemented. This is a standalone browser dashboard for local Codex logs.
 
-## 来源、署名与许可
+## Sources, attribution and license
 
-本项目是 **HALOFLUX 的修改版**，不是 OpenAI、DeepSeek 或上游作者的官方产品。
+This project is a **modified version of HALOFLUX**, not an official product of OpenAI, DeepSeek or the upstream authors.
 
-- 原作：**HALOFLUX by Ryder191 (RYDER CODE / Ms MAIKEBAIs CAT)** — <https://github.com/Ryder191/haloflux>
-- Canvas 社区适配来源：**Ke-wood / dsh-haloflux** — <https://github.com/Ke-wood/dsh-haloflux>，本项目基于其独立引擎 v0.7.1 的本地修改版。
-- 本项目新增／修改：Codex 本地只读适配、独立页面与启动方式、语义圆盘面板、结果与待处理识别、布局及测试。
+- Original work: **HALOFLUX by Ryder191 (RYDER CODE / Ms MAIKEBAIs CAT)** — <https://github.com/Ryder191/haloflux>
+- Community Canvas adaptation: **Ke-wood / dsh-haloflux** — <https://github.com/Ke-wood/dsh-haloflux>. This project uses a locally modified version of its standalone v0.7.1 engine.
+- Additions/modifications here: local read-only Codex adaptation, standalone host and startup, semantic ring panels, result/pending-issue recognition, layout refinements and tests.
 
-保留上游 `LICENSE` 和 `NOTICE`。**仅限非商业用途**，不是 MIT／Apache 授权；使用、修改和再分发须遵守随附许可证及必需署名。不得据此宣称可用于商业产品或公司内部商业用途。
+Upstream `LICENSE` and `NOTICE` are retained. **Noncommercial use only**: this is not MIT/Apache-licensed. Use, modification and redistribution must comply with the included license and required attribution. Do not represent it as permitting commercial-product or internal commercial-company use.
 
 Required Notice: Copyright (c) 2026 Ryder191 (RYDER CODE / Ms MAIKEBAIs CAT) - https://github.com/Ryder191/haloflux
 

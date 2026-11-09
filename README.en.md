@@ -1,6 +1,6 @@
 # HALOFLUX · Codex
 
-[简体中文](./README.md) | **English**
+**English** | [简体中文](./README.zh-CN.md)
 
 A **standalone live dashboard** that maps local Codex session activity onto the HALOFLUX light ring. Watch its half-ring composition, camera motion, actions, targets and results, with chat and activity records alongside it.
 
