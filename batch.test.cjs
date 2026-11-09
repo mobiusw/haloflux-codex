@@ -1,0 +1,15 @@
+const assert=require('node:assert/strict');
+const {actionSummary,operationKey}=require('./actions.cjs');
+const {createState,parseLine}=require('./parser.cjs');
+const payload={type:'custom_tool_call',call_id:'batch',name:'exec',input:'text(await tools.exec_command({cmd:"Get-Content example.py"}));text(await tools.exec_command({cmd:"node failing.test.cjs"}));'};
+assert.deepEqual(actionSummary(payload),{action:'批量工具调用',target:''});
+assert.equal(operationKey(payload,'C:/demo'),null);
+assert.deepEqual(actionSummary({arguments:{cmd:'node first.test.cjs; node second.test.cjs'}}),{action:'批量命令',target:''});
+assert.deepEqual(actionSummary({arguments:{cmd:'node -e "console.log(1); console.log(2)"'}}),{action:'运行命令',target:''});
+const state=createState('batch');
+parseLine(state,JSON.stringify({type:'response_item',payload,timestamp:new Date().toISOString()}));
+parseLine(state,JSON.stringify({type:'response_item',timestamp:new Date().toISOString(),payload:{type:'custom_tool_call_output',call_id:'batch',output:[{exit_code:0},{exit_code:1}]}}));
+assert.equal(state.tools[0].state,'error');
+assert.equal(state.tools[0].target,'');
+assert.equal(state.issues.length,0,'不能把批量调用中的失败归给第一个对象');
+console.log('PASS: batch attribution and quoted shell separators');

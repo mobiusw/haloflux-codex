@@ -1,0 +1,52 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HALOFLUX · Codex 看板</title>
+<style>
+:root{color-scheme:dark;--bg:#08090b;--line:#292d33;--muted:#a5aab3;--accent:#98e0cf}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#eceef2;font:15px/1.65 'Segoe UI','Microsoft YaHei',sans-serif}header{padding:22px 28px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:24px}h1{font-size:21px;margin:0;font-weight:600}header span{color:var(--accent);margin-left:auto}main{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(340px,1fr);height:calc(100vh - 87px)}.visual{position:relative;display:flex;flex-direction:column;min-height:0;border-right:1px solid var(--line)}.controls{padding:20px 28px;display:grid;gap:8px}label,small,.muted{color:var(--muted)}select,button{font:inherit;color:inherit;background:#15181c;border:1px solid #424851;border-radius:6px;padding:9px 12px}select{width:100%;min-width:0}button{cursor:pointer}button:hover{border-color:var(--accent)}:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.halo{flex:1;position:relative;min-height:260px}iframe{border:0;width:100%;height:100%;position:absolute;inset:0;pointer-events:none}.caption{position:absolute;bottom:18px;left:28px;right:28px;background:#08090bcc;color:var(--muted);font-size:12px}.metrics{padding:16px 28px;border-top:1px solid var(--line);display:flex;gap:28px;flex-wrap:wrap}.metrics b{display:block;font-size:18px;font-variant-numeric:tabular-nums}.metrics small{font-size:12px}.reading{display:flex;flex-direction:column;min-height:0}.toolbar{padding:18px 24px;display:flex;gap:10px;border-bottom:1px solid var(--line)}.toolbar button[aria-selected=true]{background:#98e0cf;color:#081410;border-color:#98e0cf}#content{overflow:auto;padding:0 24px 24px;flex:1;overflow-wrap:anywhere;scrollbar-color:#4a515a #101216}.message{padding:20px 0;border-bottom:1px solid var(--line)}.message strong{color:var(--accent);font-size:13px}.message pre{white-space:pre-wrap;font:14px/1.8 'Segoe UI','Microsoft YaHei',sans-serif;margin:10px 0}.event{display:flex;gap:14px;border-bottom:1px solid var(--line);padding:12px 0}.event time{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}.foot{font-size:12px;padding:12px 24px;color:var(--muted);border-top:1px solid var(--line)}a{color:var(--accent)}#cwd{overflow-wrap:anywhere;font-size:12px}::selection{background:#98e0cf;color:#08090b}@media(max-width:800px){header{padding:16px;flex-wrap:wrap;gap:10px}main{display:block;height:auto}.visual{border-right:0}.halo{height:340px;flex:none}.reading{height:650px}.controls{padding:16px}.metrics{padding:16px}.caption{left:16px}}
+[hidden]{display:none!important}button[aria-pressed="true"]{border-color:#98e0cf;color:#98e0cf}.event small{font-size:12px;color:#a5aab3}
+.latest{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;text-align:left;border:0;border-radius:0;border-top:1px solid var(--line);background:#101518;padding:12px 24px}
+.latest span:first-child{color:#98e0cf}.latest strong{font-size:15px;overflow-wrap:anywhere}.latest time{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.latest[data-kind="error"] strong{color:#ffb4ab}
+@media(max-width:800px){.halo{height:clamp(210px,39vh,340px);min-height:0}.latest{padding:12px 16px;gap:10px}}
+.session-state{display:flex;align-items:center;gap:14px;padding:10px 24px;border-top:1px solid var(--line)}
+.session-state span{color:var(--muted);font-size:13px}.session-state b{font-size:14px}
+.session-stats{border-top:1px solid var(--line)}
+.session-stats summary{cursor:pointer;padding:10px 24px;color:var(--muted);font-size:13px;min-height:44px}
+.session-stats summary:hover{color:#eceef2}
+.session-stats summary:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}
+.session-stats .metrics{border:0;padding-top:4px;gap:16px 28px}
+.session-stats[open]{max-height:220px;overflow:auto}
+@media(max-width:800px){.session-state,.session-stats summary{padding-left:16px;padding-right:16px}}
+/* Refine spacing and boundaries within the existing dark palette. */
+header{gap:18px}
+header small{font-size:12px}
+.controls{gap:7px;padding-bottom:18px}
+.controls label{font-size:13px}
+select{border-radius:8px;padding:10px 12px}
+.toolbar{align-items:center;gap:8px;padding:16px 24px}
+.toolbar button{min-height:40px;border-radius:8px}
+#pause{font-size:13px}
+#filters{padding-top:10px;padding-bottom:10px;border-bottom:0;gap:6px}
+#filters button{padding:5px 12px;min-height:34px;font-size:13px;border-color:transparent}
+#filters button[aria-pressed=true]{border-color:var(--accent)}
+.event{display:grid;grid-template-columns:68px minmax(0,1fr);gap:16px;padding:16px 0}
+.event time{font-size:12px;padding-top:2px}
+.event>span{min-width:0;font-size:14px;line-height:1.7}
+.event small{display:inline-block;margin-top:5px;line-height:1.8}
+.message{padding:22px 0}
+.message pre{margin:9px 0 0}
+.latest{padding-top:14px;padding-bottom:14px}
+.latest strong{font-weight:500}
+.session-state{padding-top:10px;padding-bottom:10px;border-top:0}
+.session-state b{font-weight:500}
+.session-stats{margin:0 24px}
+.session-stats summary{padding:11px 0}
+.session-stats .metrics{padding:4px 0 16px}
+.foot{font-size:11px;line-height:1.7}
+.reading>.foot{padding-top:10px;padding-bottom:10px}
+@media(max-width:800px){
+ header{gap:8px 14px}
+ .toolbar{padding:14px 16px}
+ .session-stats{margin-left:16px;margin-right:16px}
+ .event{grid-template-columns:62px minmax(0,1fr);gap:12px}
+ .latest{gap:10px}
+}.pending-issues{display:block;text-align:left;margin:0 24px;padding:12px 0;border:0;border-bottom:1px solid #2a2e33;border-radius:0;background:transparent;color:#ffb4ab;font:inherit;line-height:1.6;cursor:pointer;overflow-wrap:anywhere}.pending-issues[hidden]{display:none}.pending-issues:focus-visible{outline:2px solid #98e0cf;outline-offset:3px}@media(max-width:800px){.pending-issues{margin:0 16px}}</style><header><h1>HALOFLUX · Codex</h1><small>真实事件看板 · v2</small><span id="connection" role="status">正在连接…</span></header><main><section class="visual"><div class="controls"><label for="session">正在查看的聊天</label><select id="session" aria-label="选择 Codex 会话"></select><div id="cwd" class="muted"></div></div><div class="halo"><iframe id="halo" src="/halo.html?v=remove-gauges-3" title="随任务状态变化的 HALOFLUX 光环"></iframe><div class="caption">带名字的光带＝新工具调用 · ×＝明确失败。环上显示真实活动、最近操作及工具耗时；横条按近期最长耗时缩放。</div></div><button class="latest" id="latest" title="查看全部活动"><span>最近活动</span><strong id="latest-action">等待读取</strong><time id="latest-time"></time></button><div class="session-state"><span>任务状态</span><b id="status">—</b></div><details class="session-stats"><summary>会话统计</summary><div class="metrics"><div><small>工具调用 · 会话累计</small><b id="calls">—</b></div><div><small>已完成操作 · 累计</small><b id="operations">—</b></div><div><small>已记录总 token</small><b id="tokens">—</b></div><div><small>最后事件</small><b id="updated">—</b></div></div></details><div class="foot">改编自 <a href="https://github.com/Ryder191/haloflux" target="_blank" rel="noreferrer">HALOFLUX by Ryder191</a> / <a href="https://github.com/Ke-wood/dsh-haloflux" target="_blank" rel="noreferrer">Ke-wood 社区引擎</a> · 非商业 · 本机只读</div></section><section class="reading"><div class="toolbar"><button id="messages" aria-selected="true">聊天正文</button><button id="events" aria-selected="false">活动记录</button><button id="pause" style="margin-left:auto">暂停跟随</button></div><button id="pending-issues" class="pending-issues" hidden title="查看失败操作记录"></button><div id="filters" class="toolbar" hidden><button id="filter-all" aria-pressed="true">全部</button><button id="filter-tools" aria-pressed="false">工具</button><button id="filter-skills" aria-pressed="false">技能</button></div><div id="content" aria-live="off"><p class="muted">等待本机会话记录…</p></div><div class="foot" id="note">每秒检查更新。正文展示最近 30 条消息；继续在 Codex 中输入和审批。</div></section></main><script src="/app.js"></script></html>
+

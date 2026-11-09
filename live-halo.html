@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Codex 真实事件光环</title><style>html,body{margin:0;background:#08090b;width:100%;height:100%;overflow:hidden}canvas{display:block;width:100%;height:100%}#labels{position:absolute;left:12px;top:10px;color:#e8f5f2;background:#08090be8;font:14px/1.55 "Segoe UI","Microsoft YaHei",sans-serif;padding:3px 8px;border-radius:4px;pointer-events:none;max-width:90%}#labels:empty{display:none}#labels .recent{color:#a7e7d8}#labels time{color:#bac1c7;font-variant-numeric:tabular-nums}#labels div{overflow-wrap:anywhere}</style><canvas id="canvas" aria-label="真实工具事件和回答片段驱动的光环"></canvas><div id="labels" aria-label="最近识别的技能与记忆活动"></div><script src="/engine.js?v=real-activity-19"></script><script src="/bridge.js?v=real-activity-19"></script><script>
+const bridge=new CodexHaloBridge();let engine=null,session=null;const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+function mount(){if(engine)engine.dispose();engine=HalofluxEngine.create({canvas:document.getElementById('canvas'),live:bridge.live,params:{dataMode:2,centerX:0,centerY:0,scale:1,camera:1,backdrop:1,opacity:1,tempo:0.6,ringSpeed:0.6,idleMotion:0.04,ctxArc:0,tpsRibbon:0,phaseRing:0,stepTicks:0,toolBeam:1,errPin:1,errFx:0,guardOn:0,adaptQuality:1}});engine.resize();if(!reduced.matches)engine.start();}
+let highlighted = new Map();
+function renderAnnotations(records, previousCursor, quiet) {
+  const now = new Date();
+  if (quiet || previousCursor == null) highlighted.clear();
+  const labels = document.getElementById('labels');
+  labels.replaceChildren(...records.map(record => {
+    const date = new Date(record.time);
+    if (!quiet && previousCursor != null && record.seq > previousCursor && now-date < 10000) highlighted.set(record.seq, now.getTime()+5000);
+    const fresh = (highlighted.get(record.seq)||0) > now;
+    const day = date.toDateString() === now.toDateString() ? '今天' : date.toLocaleDateString('zh-CN');
+    const row = document.createElement('div');
+    row.className = fresh ? 'recent' : '';
+    const stamp = document.createElement('time');
+    stamp.textContent = day+' '+date.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});
+    const label = record.kind==='skill' ? '技能记录' : '读取记录';
+    row.append((fresh?'新增':'上次')+label+' · ', stamp, ' · '+record.stage+' · '+record.name);
+    return row;
+  }));
+  for (const [seq,until] of highlighted) if(until<=now)highlighted.delete(seq);
+}
+addEventListener('message',e=>{if(e.origin!==location.origin||e.source!==parent)return;const d=e.data;if(d.type==='codex-snapshot'){const changed=session!==d.state.id;const previousCursor=bridge.cursor;bridge.update(d.state,d.quiet);renderAnnotations(bridge.live.annotations, previousCursor, changed || d.quiet);if(changed){session=d.state.id;mount()}else if(!reduced.matches)engine.start()}else if(d.type==='codex-pause'){bridge.suspend();engine?.stop()}});
+new ResizeObserver(()=>engine?.resize()).observe(document.body);reduced.addEventListener('change',()=>{if(reduced.matches)engine?.stop();else engine?.start()});parent.postMessage({type:'halo-ready'},location.origin);
+</script></html>
+
+
+

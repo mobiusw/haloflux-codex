@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict');const {createState,parseLine,snapshot,resultState}=require('./parser.cjs');const {CodexHaloBridge}=require('./bridge.js');
+let s=createState('a');const send=(type,payload)=>parseLine(s,JSON.stringify({type,payload,timestamp:'2026-11-07T01:00:00Z'}));
+send('event_msg',{type:'task_started',turn_id:'t'});send('event_msg',{type:'task_started',turn_id:'t'});assert.equal(s.turn,1);
+send('response_item',{type:'function_call',call_id:'1',name:'read_file'});send('response_item',{type:'function_call',call_id:'1',name:'read_file'});assert.equal(s.calls,1);
+const b=new CodexHaloBridge();b.update(snapshot(s));assert.equal(b.live.beamQueue.length,0,'cold start must not replay');
+send('response_item',{type:'custom_tool_call',call_id:'2',name:'run_command'});b.update(snapshot(s));assert.equal(b.live.beamQueue.length,1);b.update(snapshot(s));assert.equal(b.live.beamQueue.length,1,'polling does not repeat');
+send('event_msg',{type:'item_completed',item:{id:'2',exit_code:1,status:'completed'}});send('response_item',{type:'custom_tool_call_output',call_id:'2',output:'opaque output'});assert.equal(s.tools.find(x=>x.id==='2').state,'error','structured failure survives opaque settlement');assert.equal(s.completed,1);
+send('response_item',{type:'function_call_output',call_id:'1',output:'error is just an example word'});assert.equal(s.tools[0].state,'returned','do not infer errors from words');assert.equal(s.completed,2);
+send('response_item',{type:'message',id:'m',role:'assistant',content:[{type:'output_text',text:'真实回答片段'}]});b.update(snapshot(s));assert.ok(b.live.tokenQueue.length>0);const count=b.live.tokenQueue.length;b.update(snapshot(s));assert.equal(b.live.tokenQueue.length,count);
+b.suspend();assert.equal(b.live.tokenQueue.length,0);send('response_item',{type:'function_call',call_id:'3',name:'paused_task'});b.update(snapshot(s));assert.equal(b.live.beamQueue.length,0,'resume is quiet');
+const other=createState('b');b.update(snapshot(other));assert.equal(b.live.tools.length,0);assert.equal(b.live.tokenQueue.length,0);assert.equal(b.live.stepsDone,0);
+send('event_msg',{type:'task_complete',turn_id:'t'});assert.equal(s.status,'completed');assert.equal(s.tools.some(x=>x.state==='running'),false);
+assert.equal(resultState({exit_code:0}),'ok');assert.equal(resultState({isError:true}),'error');assert.equal(JSON.stringify(snapshot(s)).includes('_seen'),false);
+console.log('PASS: lifecycle, call IDs, failure precedence, deduplication, cold start, pause/resume, session isolation, real text queue, privacy projection');

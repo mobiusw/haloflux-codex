@@ -1,0 +1,10 @@
+{
+  "name": "haloflux-codex",
+  "version": "0.1.0-preview.1",
+  "private": true,
+  "description": "A local, read-only HALOFLUX activity dashboard for Codex session logs.",
+  "license": "SEE LICENSE IN LICENSE",
+  "engines": {"node": ">=22"},
+  "bin": {"haloflux-codex": "cli.cjs"},
+  "scripts": {"start": "node cli.cjs --open", "test": "node scripts/test.cjs"}
+}
