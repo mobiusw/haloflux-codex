@@ -1,11 +1,6 @@
 const {readSkills} = require('./skills.cjs');
+const {browserSummary,commandItems,nestedToolCalls} = require('./batch.cjs');
 const basename = value => String(value || '').replace(/\\/g, '/').split('/').at(-1).slice(0, 70);
-function isBatch(payload) {
- let args=payload.arguments;
- if(typeof args==='string'){try{args=JSON.parse(args)}catch{args={}}}
- const source=payload.input || args?.code || '';
- return [...String(source).matchAll(/\btools\.[A-Za-z_][\w]*\s*\(/g)].length > 1;
-}
 function compound(command) {
  let quote='';
  for(let i=0;i<command.length;i++) {
@@ -17,7 +12,6 @@ function compound(command) {
  return false;
 }
 function actionSummary(payload) {
- if(isBatch(payload)) return {action:'批量工具调用',target:''};
  let args = payload.arguments;
  if (typeof args === 'string') { try { args = JSON.parse(args); } catch { args = {}; } }
  args ||= {};
@@ -28,6 +22,7 @@ function actionSummary(payload) {
  if (/read_file$/.test(payload.name || '') && (args.path || args.file_path)) return {action:'读取文件',target:basename(args.path || args.file_path)};
  let command = args.cmd || args.command;
  const source = payload.input || args.code || '';
+ if(nestedToolCalls(source).length>1)return {action:'批量工具调用',target:''};
  if (!command && /tools\.exec_command\s*\(/.test(source)) {
   const match = source.match(/\bcmd\s*:\s*("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')/);
   if (match) {
@@ -75,25 +70,49 @@ function actionSummary(payload) {
    const match = command.match(pattern);
    if (match) return {action,target:basename(match[1] || match[2] || match[3])};
   }
-  return {action:'运行命令',target:''};
+  const summary=commandItems(command)[0]?.command;
+  return {action:'运行命令',target:summary==='命令细节未识别'?'':summary || ''};
+ }
+ if (/(?:^|[_.])js$/.test(payload.name || '') && typeof source==='string') {
+  const details=browserSummary(source);
+  if(details) return details;
  }
  if (/\.getScreenshot\s*\(/.test(source)) return {action:'查看截图',target:'看板'};
  if (/\.reload\s*\(/.test(source)) return {action:'刷新页面',target:'看板'};
  if (/cua\.(?:getTab|createBrowserTab)\s*\(/.test(source)) return {action:'打开页面',target:''};
  return {action:'调用工具',target:basename(payload.name)};
 }
-// Match retries by the full command, not a basename that can collide across folders.
-function operationKey(payload, cwd) {
- if(isBatch(payload))return null;
+function retryCommand(payload) {
  let args=payload.arguments;
  if(typeof args==='string'){try{args=JSON.parse(args)}catch{args={}}}
  let command=args?.cmd || args?.command;
+ let workdir=args?.workdir;
  if(!command){
   const source=payload.input || args?.code || '';
+  if(nestedToolCalls(source).length>1)return {};
   const match=source.match(/\bcmd\s*:\s*("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')/);
   if(match){try{command=match[1][0]==='"'?JSON.parse(match[1]):match[1].slice(1,-1)}catch{}}
+  const folder=source.match(/\bworkdir\s*:\s*("(?:\\.|[^"\\])*"|'[^'\\\r\n]*')/);
+  if(folder){try{workdir=folder[1][0]==='"'?JSON.parse(folder[1]):folder[1].slice(1,-1)}catch{}}
  }
- if(!command)return null;
- return require('node:crypto').createHash('sha256').update(JSON.stringify([cwd || '',command])).digest('hex');
+ return {command,workdir};
 }
-module.exports = {actionSummary,operationKey};
+const hashRetry = values => require('node:crypto').createHash('sha256').update(JSON.stringify(values)).digest('hex');
+// Match ordinary retries by the full command and its working directory.
+function operationKey(payload, cwd) {
+ const {command,workdir}=retryCommand(payload);
+ if(!command)return null;
+ return hashRetry([workdir||cwd||'',command]);
+}
+// A commit retried with per-command author settings is still the same commit request.
+function gitCommitKey(payload,cwd){
+ const {command,workdir}=retryCommand(payload);
+ const folder=workdir||cwd;
+ if(typeof command!=='string'||typeof folder!=='string'||!folder)return null;
+ const commits=[...command.matchAll(/^[ \t]*git(?:[ \t]+-c[ \t]+["']user\.(?:name|email)=[^"'\r\n]+["'])*[ \t]+commit[ \t]+-m[ \t]+(?:"([^"$`\r\n]+)"|'([^'\r\n]+)')[ \t]*$/gim)];
+ if(commits.length!==1)return null;
+ const path=folder.replace(/\\/g,'/').replace(/\/$/,'');
+ const canonical=/^[A-Za-z]:\//.test(path)?path.toLowerCase():path;
+ return hashRetry(['git commit',canonical,commits[0][1]||commits[0][2]]);
+}
+module.exports = {actionSummary,operationKey,gitCommitKey};

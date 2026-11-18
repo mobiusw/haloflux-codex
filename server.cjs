@@ -48,13 +48,28 @@ function createDashboard(options={}) {
   if(req.method!=='GET'){res.writeHead(405,{'Allow':'GET'}).end();return}
   try{const url=new URL(req.url,origins[0]);
    if(url.pathname==='/api/sessions'){
-    const list=[...files].filter(([id])=>titles.get(id)!=='Guardian review').map(([id,file])=>({id,mtime:fs.statSync(file).mtimeMs})).sort((a,b)=>b.mtime-a.mtime).slice(0,25).map(item=>{
-     const state=read(item.id);return {id:state.id,title:state.title,cwd:state.cwd,mtime:item.mtime};
+    const candidates=[];
+    for(const [id,file] of files){
+     if(titles.get(id)==='Guardian review')continue;
+     try{candidates.push({id,mtime:fs.statSync(file).mtimeMs})}catch(error){
+      if(error.code==='ENOENT'){files.delete(id);cache.delete(id)}
+     }
+    }
+    const list=candidates.sort((a,b)=>b.mtime-a.mtime).slice(0,25).flatMap(item=>{
+     try{
+      const state=read(item.id);
+      return state?[{id:state.id,title:state.title,cwd:state.cwd,mtime:item.mtime}]:[];
+     }catch(error){
+      if(error.code==='ENOENT'){files.delete(item.id);cache.delete(item.id);return []}
+      return [{...item,title:titles.get(item.id)||item.id,cwd:''}];
+     }
     });
     res.writeHead(200,{'Content-Type':'application/json; charset=utf-8'}).end(JSON.stringify(list));return;
    }
    if(url.pathname==='/api/state'){
-    const state=read(url.searchParams.get('id'));
+    const id=url.searchParams.get('id');
+    let state;
+    try{state=read(id)}catch(error){if(error.code!=='ENOENT')throw error;files.delete(id);cache.delete(id)}
     res.writeHead(state?200:404,{'Content-Type':'application/json; charset=utf-8'}).end(JSON.stringify(state||{error:'会话不存在'}));return;
    }
    const file=routes[url.pathname];if(!file){res.writeHead(404).end();return}

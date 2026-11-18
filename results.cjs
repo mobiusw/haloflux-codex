@@ -25,6 +25,9 @@ function resultSummary(output, action = '') {
   if (unittest) result = unittest[2].startsWith('OK') ? unittest[1] + (/skipped=(\d+)/.test(unittest[2]) ? ' 项测试结束（含跳过项）' : ' 项测试通过') : unittest[1] + ' 项测试 · 存在失败';
   else if (pytest) result = pytest[1].replace(/passed/g,'通过').replace(/failed/g,'失败').replace(/skipped/g,'跳过').replace(/errors?/g,'错误');
  }
- return {state, result};
+ const summary={state,result};
+ if(state==='error'&&/^Author identity unknown[ \t]*\r?$/m.test(text))summary.gitAuthorMissing=true;
+ if(state==='ok'&&/^\[[^\]\r\n]+ [0-9a-f]{7,64}\][ \t]+\S/m.test(text))summary.gitCommitCreated=true;
+ return summary;
 }
 module.exports = {resultSummary};

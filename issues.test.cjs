@@ -40,4 +40,26 @@ const before=state.issues.length;
 send('response_item',{type:'function_call',call_id:'browser',name:'js',arguments:JSON.stringify({code:'await tab.getScreenshot()'})});
 finish('browser',{isError:true});
 assert.equal(state.issues.length,before,'没有可靠重试标识的浏览器错误只记活动历史');
+
+const gitState=createState('git-retry');
+const commitMessage='Save dashboard updates';
+const initialCommit="git add -- app.js\ngit commit -m '"+commitMessage+"'";
+const retryCommit='git -c "user.name=$authorName" -c "user.email=$authorEmail" commit -m \''+commitMessage+"'\ngit status --short";
+function gitCall(id,cmd,workdir,output){
+ const input='await tools.exec_command({cmd:'+JSON.stringify(cmd)+',workdir:'+JSON.stringify(workdir)+'})';
+ for(const payload of [{type:'custom_tool_call',name:'exec',call_id:id,input},{type:'custom_tool_call_output',call_id:id,output:JSON.stringify(output)}]){
+  parseLine(gitState,JSON.stringify({type:'response_item',payload,timestamp:new Date(1800000000000+tick++*1000).toISOString()}));
+ }
+}
+const commitCreated={exit_code:0,output:'[main abc1234] '+commitMessage};
+gitCall('git-fail',initialCommit,'C:/Work/Dashboard',{exit_code:128,output:'Author identity unknown\n\nfatal: unable to auto-detect email address'});
+assert.equal(gitState.issues.length,1);
+gitCall('wrong-repo',retryCommit,'C:/Work/Other',commitCreated);
+gitCall('wrong-commit',retryCommit.replace(commitMessage,'Different change'),'C:/Work/Dashboard',commitCreated);
+gitCall('no-commit',retryCommit,'C:/Work/Dashboard',{exit_code:0,output:'Command finished'});
+assert.equal(gitState.issues.length,1,'另一仓库、不同提交或无提交凭据均应保留原问题');
+gitCall('confirmed-retry',retryCommit,'c:\\work\\dashboard',commitCreated);
+assert.equal(gitState.issues.length,0,'同一提交补上作者身份并成功后应清除待处理');
+assert.equal(gitState.tools.find(tool=>tool.id==='git-fail').state,'error','保留失败历史');
+assert.ok(gitState.events.some(event=>event.kind==='resolved'&&event.toolId==='confirmed-retry'));
 console.log('通过：失败提示、优先展示、重复合并、未知结果保护、精确重试解决、跨轮保留、历史记录及会话隔离');

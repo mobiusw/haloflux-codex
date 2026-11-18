@@ -1,6 +1,13 @@
 // Read-only Codex rollout adapter. Never expose tool arguments, raw outputs or reasoning.
 const {readSkills,declaredSkills}=require('./skills.cjs');
-const {actionSummary,operationKey}=require('./actions.cjs');
+const {actionSummary,operationKey,gitCommitKey}=require('./actions.cjs');
+const {batchSummary}=require('./batch.cjs');
+function describeCall(payload){
+ const summary=actionSummary(payload);
+ const details=batchSummary(payload)||{};
+ if(summary.action==='调用工具' && details.commandDetail && details.commandDetail!=='命令细节未识别') return {...details,action:'运行命令',target:details.commandDetail};
+ return {...summary,...details};
+}
 const {resultSummary}=require('./results.cjs');
 const {recallRequest,memoryRead}=require('./recall.cjs');
 function createState(id){return {id,title:id,cwd:'',status:'unknown',calls:0,completed:0,turn:0,seq:0,messages:[],events:[],skills:[],tools:[],issues:[],usage:null,_seen:new Set(),_tools:new Map()};}
@@ -16,12 +23,17 @@ function parseLine(s,line,context={}){let j;try{j=JSON.parse(line)}catch{return}
    const key=a.operationKey || id;
    s.issues=s.issues.filter(issue=>issue.key!==key);
    s.issues.push({key,toolId:id,action:a.action || a.name,target:a.target || '对象未识别',result:a.result || '工具明确失败',time:t,turn:s.turn});
-  } else if(state==='ok' && a.operationKey) {
-   const resolved=s.issues.filter(issue=>issue.key===a.operationKey);
-   s.issues=s.issues.filter(issue=>issue.key!==a.operationKey);
+ } else if(state==='ok' && a.operationKey) {
+   const resolved=s.issues.filter(issue=>{
+    if(issue.key===a.operationKey)return true;
+    const failed=s._tools.get(issue.toolId);
+    return a.gitCommitCreated&&a.gitCommitKey&&failed?.gitAuthorMissing&&failed.gitCommitKey===a.gitCommitKey;
+   });
+   const keys=new Set(resolved.map(issue=>issue.key));
+   s.issues=s.issues.filter(issue=>!keys.has(issue.key));
    for(const issue of resolved)emit('resolved','已解决 · '+issue.action+' · '+issue.target,{toolId:id,name:a.name,target:issue.target});
   }
-  if(state!=='running'&&!a.finished){a.finished=true;s.completed++}emit(state==='running'?'tool':state==='error'?'error':'result',[a.action || a.name,a.target,a.result || ({running:'开始',ok:'完成',error:'失败',returned:'已返回（状态未明确）',interrupted:'已中断'})[state]].filter(Boolean).join(' · '),{toolId:id,name:a.name,action:a.action,target:a.target,result:a.result,state});s.tools=s.tools.slice(-80);
+  if(state!=='running'&&!a.finished){a.finished=true;s.completed++}emit(state==='running'?'tool':state==='error'?'error':'result',[a.action || a.name,a.target,a.result || ({running:'开始',ok:'完成',error:'失败',returned:'已返回（状态未明确）',interrupted:'已中断'})[state]].filter(Boolean).join(' · '),{toolId:id,name:a.name,action:a.action,target:a.target,result:a.result,state,batch:a.batch,batchCount:a.batchCount,commandDetail:a.commandDetail});s.tools=s.tools.slice(-80);
  }
  if(j.type==='session_meta'){s.cwd=p.cwd||s.cwd;s.id=p.id||s.id}
  if(j.type==='turn_context'){s.cwd=p.cwd||s.cwd;s.model=p.model||s.model}
@@ -42,8 +54,8 @@ function parseLine(s,line,context={}){let j;try{j=JSON.parse(line)}catch{return}
    if(p.role==='assistant'&&p.phase==='commentary')for(const name of declaredSkills(text))skill(name,'声明使用','依据：助手进度消息：'+text.slice(0,350),p.id||t);
    if(text&&!/^\s*<(environment_context|external_browser_tabs|external_codex_apps_)/.test(text)&&!text.startsWith('The following is the Codex agent history')&&once('msg:'+(p.id||t+text))){const m={id:p.id||t,role:p.role,text,time:t,seq:++s.seq};s.messages.push(m);s.messages=s.messages.slice(-30);if(p.role==='user'){s.title=text.replace(/<[^>]*>/g,'').slice(0,90);s.status='running'}else emit('message','新增回答片段',{messageId:m.id,textFragment:text.slice(-1200)});if(p.phase==='final_answer')s.status='completed'}
   }
-  if(['function_call','custom_tool_call'].includes(p.type)&&once('call:'+(p.call_id||p.id))){tool(p.call_id||p.id,p.name,'running',{...actionSummary(p),operationKey:operationKey(p,s.cwd)});s.status='running'}
-  if(['function_call_output','custom_tool_call_output'].includes(p.type)&&once('out:'+(p.call_id||p.id))){const id=p.call_id||p.id;if(s._tools.has(id)){const summary=resultSummary(p.output,s._tools.get(id).action);tool(id,null,summary.state,{result:summary.result})}}
+  if(['function_call','custom_tool_call'].includes(p.type)&&once('call:'+(p.call_id||p.id))){tool(p.call_id||p.id,p.name,'running',{...describeCall(p),operationKey:operationKey(p,s.cwd),gitCommitKey:gitCommitKey(p,s.cwd)});s.status='running'}
+  if(['function_call_output','custom_tool_call_output'].includes(p.type)&&once('out:'+(p.call_id||p.id))){const id=p.call_id||p.id;if(s._tools.has(id)){const {state,...summary}=resultSummary(p.output,s._tools.get(id).action);tool(id,null,state,summary)}}
  }
  s.updated=t||s.updated;
 }

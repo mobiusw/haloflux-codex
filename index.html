@@ -1,52 +1,283 @@
 <!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HALOFLUX · Codex 看板</title>
 <style>
-:root{color-scheme:dark;--bg:#08090b;--line:#292d33;--muted:#a5aab3;--accent:#98e0cf}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#eceef2;font:15px/1.65 'Segoe UI','Microsoft YaHei',sans-serif}header{padding:22px 28px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:24px}h1{font-size:21px;margin:0;font-weight:600}header span{color:var(--accent);margin-left:auto}main{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(340px,1fr);height:calc(100vh - 87px)}.visual{position:relative;display:flex;flex-direction:column;min-height:0;border-right:1px solid var(--line)}.controls{padding:20px 28px;display:grid;gap:8px}label,small,.muted{color:var(--muted)}select,button{font:inherit;color:inherit;background:#15181c;border:1px solid #424851;border-radius:6px;padding:9px 12px}select{width:100%;min-width:0}button{cursor:pointer}button:hover{border-color:var(--accent)}:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.halo{flex:1;position:relative;min-height:260px}iframe{border:0;width:100%;height:100%;position:absolute;inset:0;pointer-events:none}.caption{position:absolute;bottom:18px;left:28px;right:28px;background:#08090bcc;color:var(--muted);font-size:12px}.metrics{padding:16px 28px;border-top:1px solid var(--line);display:flex;gap:28px;flex-wrap:wrap}.metrics b{display:block;font-size:18px;font-variant-numeric:tabular-nums}.metrics small{font-size:12px}.reading{display:flex;flex-direction:column;min-height:0}.toolbar{padding:18px 24px;display:flex;gap:10px;border-bottom:1px solid var(--line)}.toolbar button[aria-selected=true]{background:#98e0cf;color:#081410;border-color:#98e0cf}#content{overflow:auto;padding:0 24px 24px;flex:1;overflow-wrap:anywhere;scrollbar-color:#4a515a #101216}.message{padding:20px 0;border-bottom:1px solid var(--line)}.message strong{color:var(--accent);font-size:13px}.message pre{white-space:pre-wrap;font:14px/1.8 'Segoe UI','Microsoft YaHei',sans-serif;margin:10px 0}.event{display:flex;gap:14px;border-bottom:1px solid var(--line);padding:12px 0}.event time{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}.foot{font-size:12px;padding:12px 24px;color:var(--muted);border-top:1px solid var(--line)}a{color:var(--accent)}#cwd{overflow-wrap:anywhere;font-size:12px}::selection{background:#98e0cf;color:#08090b}@media(max-width:800px){header{padding:16px;flex-wrap:wrap;gap:10px}main{display:block;height:auto}.visual{border-right:0}.halo{height:340px;flex:none}.reading{height:650px}.controls{padding:16px}.metrics{padding:16px}.caption{left:16px}}
-[hidden]{display:none!important}button[aria-pressed="true"]{border-color:#98e0cf;color:#98e0cf}.event small{font-size:12px;color:#a5aab3}
-.latest{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;text-align:left;border:0;border-radius:0;border-top:1px solid var(--line);background:#101518;padding:12px 24px}
-.latest span:first-child{color:#98e0cf}.latest strong{font-size:15px;overflow-wrap:anywhere}.latest time{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
-.latest[data-kind="error"] strong{color:#ffb4ab}
-@media(max-width:800px){.halo{height:clamp(210px,39vh,340px);min-height:0}.latest{padding:12px 16px;gap:10px}}
-.session-state{display:flex;align-items:center;gap:14px;padding:10px 24px;border-top:1px solid var(--line)}
-.session-state span{color:var(--muted);font-size:13px}.session-state b{font-size:14px}
-.session-stats{border-top:1px solid var(--line)}
-.session-stats summary{cursor:pointer;padding:10px 24px;color:var(--muted);font-size:13px;min-height:44px}
-.session-stats summary:hover{color:#eceef2}
-.session-stats summary:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}
-.session-stats .metrics{border:0;padding-top:4px;gap:16px 28px}
-.session-stats[open]{max-height:220px;overflow:auto}
-@media(max-width:800px){.session-state,.session-stats summary{padding-left:16px;padding-right:16px}}
-/* Refine spacing and boundaries within the existing dark palette. */
-header{gap:18px}
-header small{font-size:12px}
-.controls{gap:7px;padding-bottom:18px}
-.controls label{font-size:13px}
-select{border-radius:8px;padding:10px 12px}
-.toolbar{align-items:center;gap:8px;padding:16px 24px}
-.toolbar button{min-height:40px;border-radius:8px}
-#pause{font-size:13px}
-#filters{padding-top:10px;padding-bottom:10px;border-bottom:0;gap:6px}
-#filters button{padding:5px 12px;min-height:34px;font-size:13px;border-color:transparent}
-#filters button[aria-pressed=true]{border-color:var(--accent)}
-.event{display:grid;grid-template-columns:68px minmax(0,1fr);gap:16px;padding:16px 0}
-.event time{font-size:12px;padding-top:2px}
-.event>span{min-width:0;font-size:14px;line-height:1.7}
-.event small{display:inline-block;margin-top:5px;line-height:1.8}
-.message{padding:22px 0}
-.message pre{margin:9px 0 0}
-.latest{padding-top:14px;padding-bottom:14px}
-.latest strong{font-weight:500}
-.session-state{padding-top:10px;padding-bottom:10px;border-top:0}
-.session-state b{font-weight:500}
-.session-stats{margin:0 24px}
-.session-stats summary{padding:11px 0}
-.session-stats .metrics{padding:4px 0 16px}
-.foot{font-size:11px;line-height:1.7}
-.reading>.foot{padding-top:10px;padding-bottom:10px}
-@media(max-width:800px){
- header{gap:8px 14px}
- .toolbar{padding:14px 16px}
- .session-stats{margin-left:16px;margin-right:16px}
- .event{grid-template-columns:62px minmax(0,1fr);gap:12px}
- .latest{gap:10px}
-}.pending-issues{display:block;text-align:left;margin:0 24px;padding:12px 0;border:0;border-bottom:1px solid #2a2e33;border-radius:0;background:transparent;color:#ffb4ab;font:inherit;line-height:1.6;cursor:pointer;overflow-wrap:anywhere}.pending-issues[hidden]{display:none}.pending-issues:focus-visible{outline:2px solid #98e0cf;outline-offset:3px}@media(max-width:800px){.pending-issues{margin:0 16px}}</style><header><h1>HALOFLUX · Codex</h1><small>真实事件看板 · v2</small><span id="connection" role="status">正在连接…</span></header><main><section class="visual"><div class="controls"><label for="session">正在查看的聊天</label><select id="session" aria-label="选择 Codex 会话"></select><div id="cwd" class="muted"></div></div><div class="halo"><iframe id="halo" src="/halo.html?v=remove-gauges-3" title="随任务状态变化的 HALOFLUX 光环"></iframe><div class="caption">带名字的光带＝新工具调用 · ×＝明确失败。环上显示真实活动、最近操作及工具耗时；横条按近期最长耗时缩放。</div></div><button class="latest" id="latest" title="查看全部活动"><span>最近活动</span><strong id="latest-action">等待读取</strong><time id="latest-time"></time></button><div class="session-state"><span>任务状态</span><b id="status">—</b></div><details class="session-stats"><summary>会话统计</summary><div class="metrics"><div><small>工具调用 · 会话累计</small><b id="calls">—</b></div><div><small>已完成操作 · 累计</small><b id="operations">—</b></div><div><small>已记录总 token</small><b id="tokens">—</b></div><div><small>最后事件</small><b id="updated">—</b></div></div></details><div class="foot">改编自 <a href="https://github.com/Ryder191/haloflux" target="_blank" rel="noreferrer">HALOFLUX by Ryder191</a> / <a href="https://github.com/Ke-wood/dsh-haloflux" target="_blank" rel="noreferrer">Ke-wood 社区引擎</a> · 非商业 · 本机只读</div></section><section class="reading"><div class="toolbar"><button id="messages" aria-selected="true">聊天正文</button><button id="events" aria-selected="false">活动记录</button><button id="pause" style="margin-left:auto">暂停跟随</button></div><button id="pending-issues" class="pending-issues" hidden title="查看失败操作记录"></button><div id="filters" class="toolbar" hidden><button id="filter-all" aria-pressed="true">全部</button><button id="filter-tools" aria-pressed="false">工具</button><button id="filter-skills" aria-pressed="false">技能</button></div><div id="content" aria-live="off"><p class="muted">等待本机会话记录…</p></div><div class="foot" id="note">每秒检查更新。正文展示最近 30 条消息；继续在 Codex 中输入和审批。</div></section></main><script src="/app.js"></script></html>
+:root {
+  color-scheme: dark;
+  --bg: #08090b;
+  --line: #292d33;
+  --muted: #a5aab3;
+  --accent: #98e0cf;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: #eceef2;
+  font: 15px/1.65 'Segoe UI', 'Microsoft YaHei', sans-serif;
+}
+label, small, .muted { color: var(--muted); }
+a { color: var(--accent); }
+::selection { background: var(--accent); color: var(--bg); }
+
+select, button {
+  font: inherit;
+  color: inherit;
+  background: #15181c;
+  border: 1px solid #424851;
+  border-radius: 6px;
+  padding: 9px 12px;
+}
+select { width: 100%; min-width: 0; border-radius: 8px; padding: 10px 12px; }
+button { cursor: pointer; }
+button:hover { border-color: var(--accent); }
+button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+header {
+  padding: 22px 28px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+h1 { font-size: 21px; margin: 0; font-weight: 600; }
+header small { font-size: 12px; }
+header span { color: var(--accent); margin-left: auto; }
+main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(340px, 1fr);
+  height: calc(100vh - 87px);
+}
+.visual {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--line);
+}
+.controls { padding: 20px 28px 18px; display: grid; gap: 7px; }
+.controls label { font-size: 13px; }
+#cwd { overflow-wrap: anywhere; font-size: 12px; }
+.halo { flex: 1; position: relative; min-height: 260px; }
+iframe { border: 0; width: 100%; height: 100%; position: absolute; inset: 0; pointer-events: none; }
+.caption {
+  position: absolute;
+  bottom: 18px;
+  left: 28px;
+  right: 28px;
+  background: #08090bcc;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.status-strip {
+  container-type: inline-size;
+  flex: none;
+  background: #101518;
+  border-top: 1px solid var(--line);
+}
+.status-strip-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  align-items: stretch;
+  padding: 4px 24px;
+  column-gap: 12px;
+}
+.status-strip button {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  text-align: left;
+  min-height: 44px;
+}
+.status-strip button:hover:not(:disabled) { background: #191f24; }
+.status-strip button:focus-visible { outline-offset: -2px; }
+.latest {
+  justify-self: start;
+  min-width: 0;
+  max-inline-size: min(100%, 360px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  align-content: center;
+  column-gap: 10px;
+  padding: 6px 8px;
+}
+.latest:disabled { cursor: default; }
+.latest-label, .session-state .state-label {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.latest strong {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  font-size: 14px;
+}
+.latest time { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.latest[data-kind="error"] strong { color: #ffb4ab; }
+.status-strip-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-inline-start: 12px;
+  border-inline-start: 1px solid var(--line);
+}
+.session-state { display: grid; grid-template-columns: auto auto; align-items: center; gap: 0 7px; white-space: nowrap; }
+.session-state b { font-size: 13px; font-weight: 500; }
+.state-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; color: var(--muted); }
+.session-state[data-state="running"] .state-dot { color: var(--accent); }
+.session-state[data-state="failed"] .state-dot { color: #ffb4ab; }
+.session-state[data-state="interrupted"] .state-dot,
+.session-state[data-state="stale"] .state-dot { color: #e7c88a; }
+.stats-toggle { display: flex; align-items: center; gap: 8px; padding: 6px 8px; color: var(--muted); font-size: 13px; white-space: nowrap; }
+.stats-toggle[aria-expanded="true"] { color: var(--accent); }
+.stats-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+.status-strip .metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 10px 8px 12px;
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--line);
+}
+.status-strip .metrics small { display: block; font-size: 12px; }
+.status-strip .metrics b { display: block; font-size: 15px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+
+.reading { display: flex; flex-direction: column; min-height: 0; }
+.toolbar { display: flex; align-items: center; gap: 8px; padding: 16px 24px; border-bottom: 1px solid var(--line); }
+.toolbar button { min-height: 40px; border-radius: 8px; }
+.toolbar button[aria-selected="true"] { background: var(--accent); color: #081410; border-color: var(--accent); }
+#pause { font-size: 13px; }
+#filters { padding-top: 10px; padding-bottom: 10px; border-bottom: 0; gap: 6px; }
+#filters button { padding: 5px 12px; min-height: 34px; font-size: 13px; border-color: transparent; }
+#filters button[aria-pressed="true"] { border-color: var(--accent); }
+
+.pending-issues {
+  display: block;
+  text-align: left;
+  margin: 0 24px;
+  padding: 12px 0;
+  border: 0;
+  border-bottom: 1px solid #2a2e33;
+  border-radius: 0;
+  background: transparent;
+  color: #ffb4ab;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+#content {
+  overflow: auto;
+  overflow-anchor: none;
+  padding: 0 24px 24px;
+  flex: 1;
+  overflow-wrap: anywhere;
+  scrollbar-color: #4a515a #101216;
+}
+.message { padding: 22px 0; border-bottom: 1px solid var(--line); }
+.message strong { color: var(--accent); font-size: 13px; }
+.message pre { white-space: pre-wrap; font: 14px/1.8 'Segoe UI', 'Microsoft YaHei', sans-serif; margin: 9px 0 0; }
+
+.event {
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.event time { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; padding-top: 2px; }
+.event > span { min-width: 0; font-size: 14px; line-height: 1.7; }
+.event small { display: inline-block; margin-top: 5px; color: var(--muted); font-size: 12px; line-height: 1.8; }
+
+.skill-record { min-width: 0; color: var(--accent); }
+.skill-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; }
+.skill-heading strong { min-width: 0; font-size: 15px; font-weight: 600; line-height: 1.45; overflow-wrap: anywhere; }
+.skill-stage { font-size: 12px; line-height: 1.45; padding-inline-start: 10px; border-inline-start: 1px solid var(--line); }
+.skill-evidence { margin: 4px 0 0; font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; }
+
+.call-event { padding-block: 5px; align-items: start; }
+.call-event time { padding-top: 8px; }
+.batch-details { min-width: 0; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.batch-details ol { margin: 6px 0; padding-left: 24px; }
+.call-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 68px) 14px;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  list-style: none;
+  cursor: pointer;
+  color: var(--accent);
+}
+.call-summary::-webkit-details-marker { display: none; }
+.call-title { color: #eceef2; overflow-wrap: anywhere; }
+.call-state, .call-duration, .call-caret { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.call-state[data-state="error"] { color: #ffb4ab; }
+.call-state[data-state="interrupted"] { color: #e7c88a; }
+.call-caret { font-size: 18px; }
+.batch-details[open] .call-caret { transform: rotate(90deg); }
+
+.foot { padding: 12px 24px; color: var(--muted); border-top: 1px solid var(--line); font-size: 11px; line-height: 1.7; }
+.reading-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 10px; }
+.reading-footer button { flex: none; padding: 5px 10px; color: var(--accent); white-space: nowrap; }
+.reading-footer button[hidden] { visibility: hidden; }
+
+@media (max-width: 800px) {
+  header { padding: 16px; flex-wrap: wrap; gap: 8px 14px; }
+  main { display: block; height: auto; }
+  .visual { border-right: 0; }
+  .reading { height: 650px; }
+  .controls { padding: 16px 16px 18px; }
+  .halo { height: clamp(210px, 39vh, 340px); min-height: 0; flex: none; }
+  .caption { left: 16px; }
+  .status-strip-grid { padding-inline: 12px; }
+  .toolbar { padding: 14px 16px; }
+  .pending-issues { margin: 0 16px; }
+  .event { grid-template-columns: 62px minmax(0, 1fr); gap: 12px; }
+}
+
+@media (max-width: 540px) {
+  .call-summary { grid-template-columns: minmax(0, 1fr) auto auto 10px; gap: 5px; }
+  .call-state, .call-duration { font-size: 11px; }
+}
+
+@container (max-width: 500px) {
+  .status-strip-grid { grid-template-columns: minmax(0, 1fr); }
+  .status-strip-controls { border-inline-start: 0; padding-inline-start: 8px; }
+  .session-state { display: flex; gap: 7px; }
+  .status-strip .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+</style><header><h1>HALOFLUX · Codex</h1><small>真实事件看板 · v2</small><span id="connection" role="status">正在连接…</span></header><main><section class="visual"><div class="controls"><label for="session">正在查看的聊天</label><select id="session" aria-label="选择 Codex 会话" disabled><option>正在加载聊天…</option></select><div id="cwd" class="muted"></div></div><div class="halo"><iframe id="halo" src="/halo.html?v=remove-gauges-3" title="随任务状态变化的 HALOFLUX 光环"></iframe><div class="caption">带名字的光带＝新工具调用 · ×＝明确失败。环上显示真实活动、最近操作及工具耗时；横条按近期最长耗时缩放。</div></div><section class="status-strip" aria-label="会话状态">
+ <div class="status-strip-grid">
+  <button type="button" class="latest" id="latest" title="查看全部活动" disabled>
+   <span class="latest-label">最近活动</span>
+   <strong id="latest-action">等待读取</strong>
+   <time id="latest-time"></time>
+  </button>
+  <div class="status-strip-controls">
+   <div class="session-state" id="session-state">
+    <span class="state-label">任务状态</span>
+    <span class="state-dot" aria-hidden="true"></span>
+    <b id="status" role="status">—</b>
+   </div>
+   <button type="button" class="stats-toggle" id="stats-toggle" aria-expanded="false" aria-controls="session-metrics">
+    会话统计
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="m2.5 4.5 3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+   </button>
+  </div>
+  <div class="metrics" id="session-metrics" hidden>
+   <div><small>工具调用累计</small><b id="calls">—</b></div>
+   <div><small>已完成操作累计</small><b id="operations">—</b></div>
+   <div><small>已记录总 token</small><b id="tokens">—</b></div>
+   <div><small>最后事件</small><b id="updated">—</b></div>
+  </div>
+ </div>
+</section><div class="foot">改编自 <a href="https://github.com/Ryder191/haloflux" target="_blank" rel="noreferrer">HALOFLUX by Ryder191</a> / <a href="https://github.com/Ke-wood/dsh-haloflux" target="_blank" rel="noreferrer">Ke-wood 社区引擎</a> · 非商业 · 本机只读</div></section><section class="reading"><div class="toolbar"><button id="messages" aria-selected="true">聊天正文</button><button id="events" aria-selected="false">活动记录</button><button id="pause" style="margin-left:auto">暂停跟随</button></div><button id="pending-issues" class="pending-issues" hidden title="查看失败操作记录"></button><div id="filters" class="toolbar" hidden><button id="filter-all" aria-pressed="true">全部</button><button id="filter-tools" aria-pressed="false">工具</button><button id="filter-skills" aria-pressed="false">技能</button></div><div id="content" tabindex="-1" aria-label="记录列表" aria-live="off"><p class="muted">等待本机会话记录…</p></div><div class="foot reading-footer"><span id="note">每秒检查更新。正文展示最近 30 条消息；继续在 Codex 中输入和审批。</span><button type="button" id="jump-latest" hidden>回到最新</button></div></section></main><script src="/app.js"></script></html>
 

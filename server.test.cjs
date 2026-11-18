@@ -7,14 +7,19 @@ async function run(){
  const id='00000000-0000-4000-8000-000000000001';
  const sessionDir=path.join(directory,'sessions');fs.mkdirSync(sessionDir);
  const file=path.join(sessionDir,'rollout-'+id+'.jsonl');
+ const removedId='00000000-0000-4000-8000-000000000002';
+ const removedFile=path.join(sessionDir,'rollout-'+removedId+'.jsonl');
  const line=payload=>JSON.stringify({type:'response_item',timestamp:new Date().toISOString(),payload})+'\n';
  fs.writeFileSync(file,line({type:'message',role:'user',id:'user',content:[{type:'input_text',text:'合成测试会话'}]}));
+ fs.writeFileSync(removedFile,'');
  const server=createDashboard({codexHome:directory});
  let empty;
  try{
   server.listen(0,'127.0.0.1');await once(server,'listening');
   const base=`http://127.0.0.1:${server.address().port}`;
+  fs.unlinkSync(removedFile);
   const sessions=await (await fetch(base+'/api/sessions')).json();
+  assert.equal(sessions.length,1,'一个日志在扫描后消失时仍返回其他会话');
   assert.equal(sessions[0].id,id,'不依赖 session_index 也能发现日志');
   assert.equal(sessions[0].title,'合成测试会话');
   const command=line({type:'function_call',call_id:'one',name:'exec',arguments:JSON.stringify({cmd:'python -m unittest tests.example',private:'DO_NOT_PUBLISH_RAW_ARGUMENTS'})});

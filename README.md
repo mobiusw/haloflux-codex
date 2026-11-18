@@ -54,11 +54,11 @@ The server listens only on `127.0.0.1`; LAN and public access are not supported.
 |---|---|
 | Session selector | Lists up to 25 most recently modified sessions, including titles and working directories; remembers the browser's last selection |
 | Chat text | Shows the last 30 user/assistant messages as plain text; Markdown is not rendered as rich text |
-| Activity history | Keeps the latest 160 events; filters for all events, tools or skills; shows timestamps, actions, targets, results and underlying tool names |
-| Following and pausing | Follows new records when near the bottom; pausing affects only the dashboard, not Codex or running commands |
+| Activity history | Keeps the latest 160 events with filters for all events, tools or skills. A tool call updates in place and can expand to show recognized commands or child tools |
+| Following and pausing | Follows new records at the bottom, preserves your reading position further up, and offers Jump to Latest. Pausing applies to the dashboard |
 | Latest activity | Shows the most recent event and timestamp; click to open activity history |
 | Session state | Shows running, completed, interrupted or failed states from logs; a running task without new logs for two minutes displays “waiting for new logs” |
-| Collapsible statistics | Tool call count, completed call count, logged cumulative tokens and last event time |
+| Collapsible statistics | Expand the status strip to see tool calls, completed calls, logged cumulative tokens and last event time |
 | Animated ring | Half-ring composition, automatic camera motion, beams and a background network; new tools trigger beams, and explicit failures can produce × markers |
 | Semantic panels | Rotates through skill evidence, history reads, current request, latest reply, tools, results and current-turn pending issues |
 | Recent actions | Merges recent identical actions and targets, showing up to three categories; unrecognized operations retain generic names |
@@ -107,7 +107,7 @@ The Notebook rules are not tied to a particular filename, but they do require a 
 - Parses structured exit codes, explicit error flags and some command completion metadata. The word `error` in ordinary output, or a code sample containing `exit_code: 1`, is not enough by itself to establish failure.
 - For recognized test operations, extracts counts from standard `unittest` and some `pytest` summaries, such as “9 tests passed.” Other frameworks generally show only the process exit code.
 - **Exit code 0 does not prove business correctness.** Without reliable evidence, the result remains “unconfirmed,” rather than being treated as successful.
-- An explicitly successful retry of the exact same command in the same working directory removes its pending issue and adds a “resolved” event. Rewritten commands are not automatically inferred to be the same operation, and unrelated successful commands do not clear it.
+- An explicitly successful retry of the exact same command in the same working directory removes its pending issue and adds a “resolved” event. A Git commit retried with per-command author settings also clears a matching author-identity failure when Git confirms the commit. Other rewritten commands still need an exact match.
 - Previous-turn failures do not appear as current-turn pending issues. Failure and resolution history remains subject to the latest-160-event limit. Failures with unknown targets, batch orchestration or no reliable retry identifier remain only in activity history.
 - Dedicated “waiting for approval” and “waiting for user input” states are not implemented; a long gap without logs is not classified as a hang.
 
