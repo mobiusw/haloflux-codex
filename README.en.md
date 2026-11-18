@@ -6,7 +6,7 @@ A **standalone live dashboard** that maps local Codex session activity onto the 
 
 **Preview `0.1.0-preview.1` · Node.js 22+ · No third-party runtime dependencies · Noncommercial use only**
 
-![HALOFLUX Codex: synthetic session preview](docs/preview.png)
+![HALOFLUX Codex dashboard with an expanded status strip, a skill record, and batch command details](docs/preview.png)
 
 *The preview uses only synthetic events and example filenames, not real conversations or training data.*
 

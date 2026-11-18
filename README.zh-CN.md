@@ -6,7 +6,7 @@
 
 **预览版 `0.1.0-preview.1` · Node.js 22+ · 无第三方运行依赖 · 仅限非商业使用**
 
-![HALOFLUX Codex：合成会话预览](docs/preview.png)
+![HALOFLUX Codex 看板预览，展示展开后的状态栏、技能记录和批量命令明细](docs/preview.png)
 
 *预览图完全使用合成会话与示例文件名，不是真实聊天或训练数据。*
 
