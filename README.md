@@ -4,7 +4,7 @@
 
 A **standalone live dashboard** that maps local Codex session activity onto the HALOFLUX light ring. Watch its half-ring composition, camera motion, actions, targets and results, with chat and activity records alongside it.
 
-**Preview `0.1.0-preview.1` · Node.js 22+ · No third-party runtime dependencies · Noncommercial use only**
+**Preview `0.1.0-preview.2` · Node.js 22+ · No third-party runtime dependencies · Noncommercial use only**
 
 ![HALOFLUX Codex dashboard with an expanded status strip, a skill record, and batch command details](docs/preview.png)
 
@@ -15,7 +15,7 @@ This unofficial Codex adaptation modifies HALOFLUX and reuses the DeepSeek Harne
 ## Quick start
 
 1. Install [Node.js 22 or later](https://nodejs.org/).
-2. Download and extract this repository's ZIP, or download a package from Releases.
+2. Download and extract the [preview.2 release ZIP](https://github.com/mobiusw/haloflux-codex/releases/tag/v0.1.0-preview.2), or download the current source ZIP from the repository.
 3. **Windows: double-click `start.cmd`.** The server opens your browser automatically. Keep its terminal window open; press `Ctrl+C` to stop it.
 4. Use Codex normally and select the corresponding session in the dashboard.
 
